@@ -113,7 +113,7 @@ class GymMoreRedBalls(RoomGridLevel):
     | 6   | done         | Unused            |
     """
 
-    def __init__(self, room_size=8,
+    def __init__(self, room_size=10,
         num_rows=3,
         num_cols=3,
         num_dists=0, num_objs=3,

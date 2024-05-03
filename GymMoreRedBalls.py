@@ -33,6 +33,7 @@ class InOrderInstr(SeqInOrderInstr):
     Sequence two instructions in order:
     eg: pickup red ball 1, pickup red ball 2, pickup red ball 3
     """
+
     def surface(self, env):
         text = ""
 
@@ -49,6 +50,7 @@ class InOrderInstr(SeqInOrderInstr):
         for instr in self.instr_s:
             instr.reset_verifier(env)
         self.s_done = [False for _ in self.instr_s]
+        self.s_earned = [False for _ in self.instr_s] # 매번 subgoal 마다 reward를 받게할려면 이거 필요
 
     def verify(self, action, i=0):
         # if all instructions are sequentially done, return "success". if not, "failure"
@@ -119,13 +121,14 @@ class GymMoreRedBalls(RoomGridLevel):
         num_dists=0, num_objs=3,
         action_kinds=["goto"],
         instr_kinds=["seq"], # or ["inorder_seq"]
+             subgoal_reward = 0,
         **kwargs,
         ):
         self.num_dists = num_dists
         self.action_kinds = action_kinds
         self.instr_kinds = instr_kinds
         self.locked_room = None
-
+        self.subgoal_reward = subgoal_reward
         self.num_dists = num_dists
         self.num_objs = num_objs
         super().__init__(num_rows=1, num_cols=1, room_size=room_size, **kwargs)
@@ -262,6 +265,14 @@ class GymMoreRedBalls(RoomGridLevel):
         elif status == "failure":
             terminated = True
             reward = 0
+
+
+        # subgoal rewarding
+        for c, don in enumerate(self.instrs.s_done):
+            if don == True and self.instrs.s_earend[c] == False:
+                reward += self.subgoal_reward
+                self.instrs.s_earend[c] = True
+
 
         return obs, reward, terminated, truncated, info
 
